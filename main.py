@@ -94,17 +94,25 @@ def noise() -> float:
 
 
 def main():
-    env = gym.make('CartPole-v0')
+    """Following Barto-Sutton-Anderson's paper (http://www.derongliu.org/adp/adp-cdrom/Barto1983.pdf)"""
 
-    UPDATE_RATE = 1000
-    TRACE_DECAY_RATE = 0.9
+    env = gym.make('CartPole-v1')
+
+    ALPHA = 1000
+    BETA = 0.5
+    DELTA = 0.9
+    GAMMA = 0.95
+    LAMBDA = 0.8
 
     weights = np.repeat(0, 162)
+    weights_critic = np.repeat(0, 162)
 
     for e in range(100):
         t = 0
 
         eligibility = np.repeat(0, 162)
+        eligibility_critic = np.repeat(0, 162)
+        weighted_sums_critic = []
 
         state = env.reset()
         while True:
@@ -121,16 +129,24 @@ def main():
 
             state, reward, done, info = env.step(action)
 
-            # update
-            modified_reward = -1 if done else 0  # penalize for not reaching the goal
-            weights = weights + UPDATE_RATE * modified_reward * eligibility
-            eligibility = TRACE_DECAY_RATE * eligibility + (1 - TRACE_DECAY_RATE) * output * state_vector
+            modified_reward = -1 if done and t < 500 else 0  # match the paper method of rewarding
+
+            # update - critic
+            weighted_sum_critic = np.dot(weights_critic, state_vector)
+            weighted_sums_critic.append(weighted_sum_critic)
+            internal_reward = modified_reward + GAMMA * weighted_sum_critic - weighted_sums_critic[t - 1]
+
+            weights_critic = weights_critic + BETA * internal_reward * state_vector
+            eligibility_critic = LAMBDA * eligibility_critic + (1 - LAMBDA) * state_vector
+
+            # update - actor
+            weights = weights + ALPHA * internal_reward * eligibility
+            eligibility = DELTA * eligibility + (1 - DELTA) * output * state_vector
 
             if done:
                 # print(f"=== DONE ===")
                 print(f"Episode {e} finished after {t} timesteps.")
                 break
-
 
             t += 1
 
