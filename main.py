@@ -90,19 +90,19 @@ def activation_to_action(activation: float) -> int:
 
 def noise() -> float:
     """Return a random number from a Gaussian distribution with mean 0 and stdev 0.1."""
-    return np.random.normal(0, 0.1)
+    return np.random.normal(0, 0.01)
 
 
 def main():
     env = gym.make('CartPole-v0')
 
-    UPDATE_RATE = 0.2
+    UPDATE_RATE = 0.8
     TRACE_DECAY_RATE = 0.9
 
     weights = np.repeat(0, 162)
     eligibility = np.repeat(0, 162)
 
-    for e in range(20):
+    for e in range(50):
         t = 0
 
         state = env.reset()
@@ -111,7 +111,7 @@ def main():
 
             # observation
             state_discretized = discretize(state)
-            print(f"Episode {e}: t = {t}: State = {state_discretized}")
+            # print(f"Episode {e}: t = {t}: State = {state_discretized}")
             state_vector = flatten_discrete_state(state_discretized)
 
             # action
@@ -121,7 +121,8 @@ def main():
             state, reward, done, info = env.step(action)
 
             if done:
-                print(f"=== DONE ===")
+                # print(f"=== DONE ===")
+                print(f"Episode {e} finished after {t} timesteps.")
                 break
 
             # update
