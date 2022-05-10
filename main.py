@@ -96,7 +96,7 @@ def noise() -> float:
 def main():
     env = gym.make('CartPole-v0')
 
-    UPDATE_RATE = 0.8
+    UPDATE_RATE = 1000
     TRACE_DECAY_RATE = 0.9
 
     weights = np.repeat(0, 162)
