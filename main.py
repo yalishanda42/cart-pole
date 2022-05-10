@@ -100,10 +100,11 @@ def main():
     TRACE_DECAY_RATE = 0.9
 
     weights = np.repeat(0, 162)
-    eligibility = np.repeat(0, 162)
 
-    for e in range(50):
+    for e in range(100):
         t = 0
+
+        eligibility = np.repeat(0, 162)
 
         state = env.reset()
         while True:
@@ -120,14 +121,16 @@ def main():
 
             state, reward, done, info = env.step(action)
 
+            # update
+            modified_reward = -1 if done else 0  # penalize for not reaching the goal
+            weights = weights + UPDATE_RATE * modified_reward * eligibility
+            eligibility = TRACE_DECAY_RATE * eligibility + (1 - TRACE_DECAY_RATE) * output * state_vector
+
             if done:
                 # print(f"=== DONE ===")
                 print(f"Episode {e} finished after {t} timesteps.")
                 break
 
-            # update
-            weights = weights + UPDATE_RATE * reward * eligibility
-            eligibility = TRACE_DECAY_RATE * eligibility + (1 - TRACE_DECAY_RATE) * output * state_vector
 
             t += 1
 
