@@ -97,12 +97,13 @@ def main():
     env = gym.make('CartPole-v0')
 
     UPDATE_RATE = 0.2
-    TRACE_DECAY_RATE = 0.5
+    TRACE_DECAY_RATE = 0.9
+
+    weights = np.repeat(0, 162)
+    eligibility = np.repeat(0, 162)
 
     for e in range(20):
         t = 0
-        weights = np.repeat(0, 162)
-        eligibility = np.repeat(0, 162)
 
         state = env.reset()
         while True:
